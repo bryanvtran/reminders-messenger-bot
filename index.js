@@ -17,9 +17,87 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 // verify token, should be a random string
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
+// Mongoose
+var mongoose = require('mongoose');
+const mongoDB = process.env.MONGO_URL;
+
+mongoose.connect(mongoDB, {
+    useMongoClient: true
+});
+// Get Mongoose to use the global promise library
+mongoose.Promise = global.Promise;
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+// create task schema
+var Schema = mongoose.Schema;
+
+var TaskSchema = new Schema({
+    sender_psid: String,
+    task: String,
+    dt: Date
+});
+
+// Compile model from schema
+var TaskModel = mongoose.model('TaskModel', TaskSchema );
+
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
+// Index page
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+// Add task
+app.post('/task/create', (req, res) => {
+    let body = req.body;
+    let psid = body.psid;
+    let task = body.task;
+    let dt = new Date();
+
+    if (!psid || !task || !dt) {
+        return res.status(200).send({ status: 'fail', msg: 'All fields are required' });
+    }
+
+    // Create an instance of model
+    var task_instance = new TaskModel({ 
+        sender_psid: psid,
+        task: task,
+        dt: dt
+    });
+
+    // Save the new model instance, passing a callback
+    task_instance.save(function (err) {
+        if (err) { return res.status(200).send({ status: 'fail' }); }
+
+        // saved!
+        console.log('Saved!');
+        return res.status(200).send({ status: 'success' });
+    });
+});
+
+app.get('/task/all', (req, res) => {
+    TaskModel.find(function (err, tasks) {
+        if (err) return console.error(err);
+        res.send(tasks);
+    });
+});
+
+app.get('/task/get', (req, res) => {
+    let psid = req.query['psid'];
+    if (!psid) {
+        return res.status(200).send({ status: 'fail', msg: 'PSID is required.' });
+    }
+
+    TaskModel.find({ sender_psid: psid }, function (err, tasks) {
+        if (err) return console.error(err);
+        res.send(tasks);
+    });
+});
 
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {  
@@ -53,7 +131,7 @@ app.post('/webhook', (req, res) => {
         // Returns a '404 Not Found' if event is not from a page subscription
         res.sendStatus(404);
     }
-  
+
 });
 
 // Adds support for GET requests to our webhook
@@ -81,9 +159,16 @@ app.get('/webhook', (req, res) => {
     }
 });
 
+// for nlp
+function firstEntity(nlp, name) {
+    return nlp && nlp.entities && nlp.entities[name] && nlp.entities[name][0];
+}
+
 // Handles messages events
 function handleMessage(sender_psid, received_message) {
     let response;
+
+    console.log(received_message);
 
     // Checks if the message contains text
     if (received_message.text) {

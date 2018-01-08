@@ -1,2 +1,9 @@
-# reminders-messenger-bot
-A messenger bot for basic reminders
+# Todo List
+A basic messenger bot for todo lists
+
+## Requirements
+1. Use NLP
+2. Make sure the bot is conversational in tone
+3. Include a button that opens a webview
+4. Include quick replies/persistent menu
+5. Put your code in github
