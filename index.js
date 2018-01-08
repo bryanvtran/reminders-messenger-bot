@@ -129,27 +129,6 @@ const RESPONSES = {
             // }
         ]
     },
-    'NEW_TASK': {
-        "attachment":{
-          "type":"template",
-          "payload":{
-            "template_type":"button",
-            "text":"Your task has been created!",
-            "buttons":[
-              {
-                "type": "postback",
-                "title": "View All Tasks",
-                "payload": "TASK_LIST"
-              },
-              {
-                "type": "postback",
-                "title": "Delete Task",
-                "payload": "DELETE_TASK"
-              }
-            ]
-          }
-        }
-    },
     'TASK_LIST': { "text": "List all the tasks here" },
     'THANKS': { "text": "No problem! Let me know if you need anything else." },
     'UNKNOWN': { "text": "I'm sorry, I can't recognize that command. Please try again or type help for further assistance." }
@@ -230,6 +209,8 @@ function createNewTask(sender_psid, task) {
         dt: new Date()
     });
 
+    console.log(task_instance._id);
+
     // Save the new model instance, passing a callback
     task_instance.save(function (err) {
         if (err) { console.error('Error creating task') }
@@ -237,6 +218,28 @@ function createNewTask(sender_psid, task) {
         // saved!
         console.log('Task created successfully!');
     });
+
+    return {
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"Your task has been created!",
+            "buttons":[
+              {
+                "type": "postback",
+                "title": "View All Tasks",
+                "payload": "TASK_LIST"
+              },
+              {
+                "type": "postback",
+                "title": "Delete Task",
+                "payload": "DELETE_"+task_instance._id
+              }
+            ]
+          }
+        }
+    }
 }
 
 // Handles messages events
@@ -275,8 +278,8 @@ function handleMessage(sender_psid, received_message) {
                 default:
                     // this is the case when we create a new task
                     let task = received_message.text;
-                    createNewTask(sender_psid, task);
-                    response = RESPONSES['NEW_TASK'];
+                    response = createNewTask(sender_psid, task);
+                    console.log(response);
                     break;
             }
         }
@@ -291,6 +294,8 @@ function handlePostback(sender_psid, received_postback) {
     // Get the payload for the postback
     let payload = received_postback.payload;
 
+    console.log(payload);
+
     // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
@@ -298,6 +303,10 @@ function handlePostback(sender_psid, received_postback) {
             break;
         case 'CREATE_TASK':
             response = RESPONSES['CREATE_TASK'];
+            break;
+        case 'DELETE_TASK':
+            deleteTask()
+            response = RESPONSES['DELETE_TASK'];
             break;
         default:
             response = RESPONSES['UNKNOWN'];
