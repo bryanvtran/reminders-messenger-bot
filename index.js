@@ -252,15 +252,13 @@ function viewAllTasks(sender_psid) {
         tasks.forEach(function(value, index) {
             taskList.push({
                 "title": value.task,
-                "subtitle": value.dt,
+                "subtitle": value.dt.toDateString()
             })
         });
 
         console.log(taskList);
 
         if (taskList) {
-            response = { "text": taskList }
-
             response = {
                 "attachment": {
                     "type": "template",
@@ -275,6 +273,8 @@ function viewAllTasks(sender_psid) {
         else {
             response = { "text": 'Yay! You have no tasks.' }
         }
+
+        console.log(response);
 
         callSendAPI(sender_psid, response);
     });
