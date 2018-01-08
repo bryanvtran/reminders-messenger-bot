@@ -211,16 +211,16 @@ function handleMessage(sender_psid, received_message) {
                           "title":"Create Task",
                           "payload":"CREATE_TASK"
                         },
-                        {
-                            "content_type":"text",
-                            "title":"Remove Task",
-                            "payload":"REMOVE_TASK"
-                        },
-                        {
-                            "content_type":"text",
-                            "title":"Complete Task",
-                            "payload":"COMPLETE_TASK"
-                        }
+                        // {
+                        //     "content_type":"text",
+                        //     "title":"Remove Task",
+                        //     "payload":"REMOVE_TASK"
+                        // },
+                        // {
+                        //     "content_type":"text",
+                        //     "title":"Complete Task",
+                        //     "payload":"COMPLETE_TASK"
+                        // }
                     ]
                 }  
             }
@@ -275,16 +275,21 @@ function handlePostback(sender_psid, received_postback) {
   
     // Get the payload for the postback
     let payload = received_postback.payload;
-  
-    // Set the response based on the postback payload
-    if (payload === 'yes') {
-      response = { "text": "Thanks!" }
-    } else if (payload === 'no') {
-      response = { "text": "Oops, try sending another image." }
-    }
-    else if (payload === 'CREATE_TASK') {
 
+    // Set the response based on the postback payload
+    switch (payload) {
+        case 'TASK_LIST':
+            response = { "text": "List all the tasks here" }
+            break;
+        case 'CREATE_TASK':
+            response = { "text": "What would you like to add to the list?" }
+            break;
+        default:
+            response = { "text": `Sorry, that command (${ payload }) is not recognized. Please try again or type help for further assistance.`}
+            break
     }
+  
+    // TODO - set switch here for TASK_LIST, CREATE_TASK, REMOVE_TASK, COMPLETE_TASK
     // Send the message to acknowledge the postback
     callSendAPI(sender_psid, response);
 }
@@ -307,9 +312,9 @@ function callSendAPI(sender_psid, response) {
         "json": request_body
     }, (err, res, body) => {
         if (!err) {
-        console.log('message sent!')
+            console.log('message sent!')
         } else {
-        console.error("Unable to send message:" + err);
+            console.error("Unable to send message:" + err);
         }
     }); 
 }
