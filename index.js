@@ -265,7 +265,13 @@ function viewAllTasks(sender_psid) {
                 taskList.push({
                     "title": value.task,
                     "subtitle": value.dt.toDateString(),
-                    "_id": value._id
+                    "buttons": [ 
+                        {
+                            "type": "postback",
+                            "title": "Delete Task",
+                            "payload": "DELETE_"+value._id
+                        }
+                    ],
                 })
             });
     
