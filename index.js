@@ -225,7 +225,7 @@ function createNewTask(sender_psid, task) {
 
     // Create an instance of model
     var task_instance = new TaskModel({ 
-        sender_psid: psid,
+        sender_psid: sender_psid,
         task: task,
         dt: new Date()
     });
