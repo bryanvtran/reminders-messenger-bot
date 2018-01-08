@@ -245,15 +245,17 @@ function createNewTask(sender_psid, task) {
 function viewAllTasks(sender_psid) {
     let response;
 
+    console.log(sender_psid);
+
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
         console.log(tasks);
-        
+
         let taskList = '';
         tasks.forEach(function(value, index) {
-            console.log(value);
-            taskList += value+'\n';
+            console.log(value.task);
+            taskList += value.task+'\n';
         });
 
         console.log(taskList);
@@ -336,7 +338,7 @@ function handlePostback(sender_psid, received_postback) {
     // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
-            viewAllTasks();
+            viewAllTasks(sender_psid);
             break;
         case 'CREATE_TASK':
             response = RESPONSES['CREATE_TASK'];
