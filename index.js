@@ -109,7 +109,7 @@ const RESPONSES = {
         "quick_replies":[
             {
                 "content_type":"text",
-                "title":"List All Tasks",
+                "title":"View All Tasks",
                 "payload":"TASK_LIST"
             },
             {
@@ -129,9 +129,30 @@ const RESPONSES = {
             // }
         ]
     },
+    'NEW_TASK': {
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"button",
+            "text":"Your task has been created!",
+            "buttons":[
+              {
+                "type": "postback",
+                "title": "View All Tasks",
+                "payload": "TASK_LIST"
+              },
+              {
+                "type": "postback",
+                "title": "Delete Task",
+                "payload": "DELETE_TASK"
+              }
+            ]
+          }
+        }
+    },
     'TASK_LIST': { "text": "List all the tasks here" },
     'THANKS': { "text": "No problem! Let me know if you need anything else." },
-    'UNKNOWN': { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance." }
+    'UNKNOWN': { "text": "I'm sorry, I can't recognize that command. Please try again or type help for further assistance." }
 }
 
 // Creates the endpoint for our webhook 
@@ -198,6 +219,26 @@ function firstEntity(nlp, name) {
     return nlp && nlp.entities && nlp.entities[name] && nlp.entities[name][0];
 }
 
+// creates task
+function createNewTask(sender_psid, task) {
+    console.log(sender_psid, task);
+
+    // Create an instance of model
+    var task_instance = new TaskModel({ 
+        sender_psid: psid,
+        task: task,
+        dt: new Date()
+    });
+
+    // Save the new model instance, passing a callback
+    task_instance.save(function (err) {
+        if (err) { console.error('Error creating task') }
+
+        // saved!
+        console.log('Task created successfully!');
+    });
+}
+
 // Handles messages events
 function handleMessage(sender_psid, received_message) {
     let response;
@@ -228,11 +269,14 @@ function handleMessage(sender_psid, received_message) {
                 case 'create task':
                     response = RESPONSES['CREATE_TASK'];
                     break;
-                case 'list all tasks':
+                case 'view all tasks':
                     response = RESPONSES['TASK_LIST'];
                     break;
                 default:
-                    response = RESPONSES['UNKNOWN'];
+                    // this is the case when we create a new task
+                    let task = received_message.text;
+                    createNewTask(sender_psid, task);
+                    response = RESPONSES['NEW_TASK'];
                     break;
             }
         }
