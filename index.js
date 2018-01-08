@@ -170,7 +170,7 @@ function handleMessage(sender_psid, received_message) {
 
     console.log(received_message);
 
-    // check if it's a greeting
+    // check if it's a greeting/thanks/bye
     const greeting = firstEntity(received_message.nlp, 'greetings');
     const thanks = firstEntity(received_message.nlp, 'thanks');
     const bye = firstEntity(received_message.nlp, 'bye');
@@ -195,77 +195,19 @@ function handleMessage(sender_psid, received_message) {
     else {
         // Checks if the message contains text
         if (received_message.text) {
-
-            // check if help
-            if (received_message.text.toLowerCase() === 'help') {
-                response = {
-                    "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
-                    "quick_replies":[
-                        {
-                            "content_type":"text",
-                            "title":"List All Tasks",
-                            "payload":"TASK_LIST"
-                        },
-                        {
-                          "content_type":"text",
-                          "title":"Create Task",
-                          "payload":"CREATE_TASK"
-                        },
-                        // {
-                        //     "content_type":"text",
-                        //     "title":"Remove Task",
-                        //     "payload":"REMOVE_TASK"
-                        // },
-                        // {
-                        //     "content_type":"text",
-                        //     "title":"Complete Task",
-                        //     "payload":"COMPLETE_TASK"
-                        // }
-                    ]
-                }  
+            // check message and send proper payload
+            switch (recieved_message.text.toLowerCase()) {
+                case 'help':
+                    helpResponse(sender_psid);
+                    break;
+                case 'create task':
+                    createTaskResponse(sender_psid);
+                    break;
+                default:
+                    unknownResponse(sender_psid);
+                    break;
             }
-            else {
-                // Creates the payload for a basic text message, which
-                // will be added to the body of our request to the Send API
-                response = {
-                    "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
-                }
-            }
-
-        } else if (received_message.attachments) {
-
-            // Gets the URL of the message attachment
-            let attachment_url = received_message.attachments[0].payload.url;
-
-            response = {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": [{
-                            "title": "Is this the right picture?",
-                            "subtitle": "Tap a button to answer.",
-                            "image_url": attachment_url,
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "Yes!",
-                                    "payload": "yes",
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "No!",
-                                    "payload": "no",
-                                }
-                            ],
-                        }]
-                    }
-                }
-            }
-        } 
-
-        // Sends the response message
-        callSendAPI(sender_psid, response);   
+        }
     } 
 }
 
@@ -276,21 +218,61 @@ function handlePostback(sender_psid, received_postback) {
     // Get the payload for the postback
     let payload = received_postback.payload;
 
-    // Set the response based on the postback payload
+    // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
-            response = { "text": "List all the tasks here" }
+            taskListReponse(sender_psid);
             break;
         case 'CREATE_TASK':
-            response = { "text": "What would you like to add to the list?" }
+            createTaskResponse(sender_psid);
             break;
         default:
-            response = { "text": `Sorry, that command (${ payload }) is not recognized. Please try again or type help for further assistance.`}
+            unknownResponse(sender_psid);
             break
-    }
-  
-    // TODO - set switch here for TASK_LIST, CREATE_TASK, REMOVE_TASK, COMPLETE_TASK
-    // Send the message to acknowledge the postback
+    }    
+}
+
+function helpResponse(sender_psid) {
+    response = {
+        "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
+        "quick_replies":[
+            {
+                "content_type":"text",
+                "title":"List All Tasks",
+                "payload":"TASK_LIST"
+            },
+            {
+              "content_type":"text",
+              "title":"Create Task",
+              "payload":"CREATE_TASK"
+            },
+            // {
+            //     "content_type":"text",
+            //     "title":"Remove Task",
+            //     "payload":"REMOVE_TASK"
+            // },
+            // {
+            //     "content_type":"text",
+            //     "title":"Complete Task",
+            //     "payload":"COMPLETE_TASK"
+            // }
+        ]
+    }  
+    callSendAPI(sender_psid, response);
+}
+
+function taskListReponse(sender_psid) {
+    response = { "text": "List all the tasks here" }
+    callSendAPI(sender_psid, response);
+}
+
+function createTaskResponse(sender_psid) {
+    response = { "text": "What would you like to add to the list?" }
+    callSendAPI(sender_psid, response);
+}
+
+function unknownResponse(sender_psid) {
+    response = { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance."}
     callSendAPI(sender_psid, response);
 }
 
