@@ -248,10 +248,12 @@ function viewAllTasks(sender_psid) {
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
+        console.log(tasks);
+        
         let taskList = '';
         tasks.forEach(function(value, index) {
-            console.log(value.task);
-            taskList += value.task+'\n';
+            console.log(value);
+            taskList += value+'\n';
         });
 
         console.log(taskList);
