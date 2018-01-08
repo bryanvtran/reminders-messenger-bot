@@ -242,6 +242,35 @@ function createNewTask(sender_psid, task) {
     }
 }
 
+function viewAllTasks(sender_psid) {
+    TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
+        if (err) return console.error(err);
+
+        let taskList = '';
+        tasks.forEach(function(value, index) {
+            taskList += value+'\n';
+        });
+
+        if (taskList) {
+            response = { "text": taskList }
+        }
+        else {
+            response = { "text": 'You have no tasks.' }
+        }
+        callSendAPI(sender_psid, response);
+    });
+}
+
+function deleteTask(tid) {
+    TaskModel.findByIdAndRemove(tid, function(err) {
+        if (!err) { console.error('Error deleting task.'); }
+
+        // deleted
+        console.log('Task deleted');
+    });
+    return {  "text": "Your task has been deleted." }
+}
+
 // Handles messages events
 function handleMessage(sender_psid, received_message) {
     let response;
@@ -299,21 +328,30 @@ function handlePostback(sender_psid, received_postback) {
     // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
-            response = RESPONSES['TASK_LIST'];
+            viewAllTasks();
             break;
         case 'CREATE_TASK':
             response = RESPONSES['CREATE_TASK'];
             break;
         case 'DELETE_TASK':
-            deleteTask()
-            response = RESPONSES['DELETE_TASK'];
+            response = deleteTask();
             break;
         default:
-            response = RESPONSES['UNKNOWN'];
+            if (payload.indexOf('DELETE') !== -1) {
+                // delete called
+                let tid = payload.split('_')[1];
+                response = deleteTask(tid);
+            }
+            else {
+                response = RESPONSES['UNKNOWN'];
+            }
+           
             break
     }    
 
-    callSendAPI(sender_psid, response);
+    if (response) {
+        callSendAPI(sender_psid, response);
+    }
 }
 
 // Sends response messages via the Send API
