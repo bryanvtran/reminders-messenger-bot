@@ -243,6 +243,8 @@ function createNewTask(sender_psid, task) {
 }
 
 function viewAllTasks(sender_psid) {
+    let response;
+    
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
