@@ -250,8 +250,8 @@ function viewAllTasks(sender_psid) {
 
         let taskList = '';
         tasks.forEach(function(value, index) {
-            console.log(value);
-            taskList += value+'\n';
+            console.log(value.task);
+            taskList += value.task+'\n';
         });
 
         console.log(taskList);
