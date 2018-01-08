@@ -105,7 +105,7 @@ const RESPONSES = {
     'CREATE_TASK':  { "text": "What would you like to add to the list?" },
     'GREETING': { "text": "Hi there! What would you like to do? Type help if you need any assistance." },
     'HELP': {
-        "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
+        "text": "Here are some things you can do: create a task and remove/complete a task. Click one of the buttons below to get started!",
         "quick_replies":[
             {
                 "content_type":"text",
@@ -116,17 +116,7 @@ const RESPONSES = {
               "content_type":"text",
               "title":"Create Task",
               "payload":"CREATE_TASK"
-            },
-            // {
-            //     "content_type":"text",
-            //     "title":"Remove Task",
-            //     "payload":"REMOVE_TASK"
-            // },
-            // {
-            //     "content_type":"text",
-            //     "title":"Complete Task",
-            //     "payload":"COMPLETE_TASK"
-            // }
+            }
         ]
     },
     'TASK_LIST': { "text": "List all the tasks here" },
@@ -248,17 +238,39 @@ function viewAllTasks(sender_psid) {
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
-        let taskList = [];
-        tasks.forEach(function(value, index) {
-            taskList.push({
-                "title": value.task,
-                "subtitle": value.dt.toDateString()
-            })
-        });
-
-        console.log(taskList);
-
-        if (taskList) {
+        if (tasks.length === 0) {
+            response = { "text": 'Yay! You have no tasks.' }
+        }
+        else if (tasks.length == 1) {
+            response = {
+                "attachment":{
+                  "type":"template",
+                  "payload":{
+                    "template_type":"button",
+                    "text":tasks[0].task,
+                    "buttons":[
+                      {
+                        "type": "postback",
+                        "title": "Delete Task",
+                        "payload": "DELETE_"+tasks[0]._id
+                      }
+                    ]
+                  }
+                }
+            }
+        }
+        else {
+            let taskList = [];
+            tasks.forEach(function(value, index) {
+                taskList.push({
+                    "title": value.task,
+                    "subtitle": value.dt.toDateString(),
+                    "_id": value._id
+                })
+            });
+    
+            console.log(taskList);
+            
             response = {
                 "attachment": {
                     "type": "template",
@@ -270,9 +282,7 @@ function viewAllTasks(sender_psid) {
                 }
             }
         }
-        else {
-            response = { "text": 'Yay! You have no tasks.' }
-        }
+
 
         console.log(response);
 
