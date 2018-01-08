@@ -172,20 +172,42 @@ function handleMessage(sender_psid, received_message) {
 
     // check if it's a greeting
     const greeting = firstEntity(received_message.nlp, 'greetings');
+    const thanks = firstEntity(received_message.nlp, 'thanks');
+    const bye = firstEntity(received_message.nlp, 'bye');
     if (greeting && greeting.confidence > 0.8) {
         response = {
             "text": "Hi there! What would you like to do? Type help if you need any assistance."
         }
         callSendAPI(sender_psid, response);
     }
+    else if (thanks && thanks.confidence > 0.8) {
+        response = {
+            "text": "No problem! Let me know if you need anything else."
+        }
+        callSendAPI(sender_psid, response);
+    }
+    else if (bye && bye.confidence > 0.8) {
+        response = {
+            "text": "Hope to see you again soon!"
+        }
+        callSendAPI(sender_psid, response);
+    }
     else {
         // Checks if the message contains text
         if (received_message.text) {
-            
-            // Creates the payload for a basic text message, which
-            // will be added to the body of our request to the Send API
-            response = {
-                "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
+
+            // check if help
+            if (received_message.text.toLowerCase() === 'help') {
+                response = {
+                    "text": "Here are some things you can do: create a task, remove a task, complete a task, and set reminders. Click one of the buttons below to get started!"
+                }  
+            }
+            else {
+                // Creates the payload for a basic text message, which
+                // will be added to the body of our request to the Send API
+                response = {
+                    "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
+                }
             }
 
         } else if (received_message.attachments) {
