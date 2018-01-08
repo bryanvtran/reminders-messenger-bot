@@ -1,5 +1,5 @@
 # Todo List
-A basic messenger bot for todo lists
+This is a basic messenger bot to help you keep track of your daily tasks.
 
 ## Requirements
 1. Use NLP
