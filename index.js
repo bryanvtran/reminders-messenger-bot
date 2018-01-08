@@ -199,7 +199,29 @@ function handleMessage(sender_psid, received_message) {
             // check if help
             if (received_message.text.toLowerCase() === 'help') {
                 response = {
-                    "text": "Here are some things you can do: create a task, remove a task, complete a task, and set reminders. Click one of the buttons below to get started!"
+                    "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
+                    "quick_replies":[
+                        {
+                            "content_type":"text",
+                            "title":"List All Tasks",
+                            "payload":"TASK_LIST"
+                        },
+                        {
+                          "content_type":"text",
+                          "title":"Create Task",
+                          "payload":"CREATE_TASK"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"Remove Task",
+                            "payload":"REMOVE_TASK"
+                        },
+                        {
+                            "content_type":"text",
+                            "title":"Complete Task",
+                            "payload":"COMPLETE_TASK"
+                        }
+                    ]
                 }  
             }
             else {
@@ -259,6 +281,9 @@ function handlePostback(sender_psid, received_postback) {
       response = { "text": "Thanks!" }
     } else if (payload === 'no') {
       response = { "text": "Oops, try sending another image." }
+    }
+    else if (payload === 'CREATE_TASK') {
+
     }
     // Send the message to acknowledge the postback
     callSendAPI(sender_psid, response);
