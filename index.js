@@ -244,14 +244,17 @@ function createNewTask(sender_psid, task) {
 
 function viewAllTasks(sender_psid) {
     let response;
-    
+
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
         let taskList = '';
         tasks.forEach(function(value, index) {
+            console.log(value);
             taskList += value+'\n';
         });
+
+        console.log(taskList);
 
         if (taskList) {
             response = { "text": taskList }
@@ -259,6 +262,7 @@ function viewAllTasks(sender_psid) {
         else {
             response = { "text": 'You have no tasks.' }
         }
+        console.log(response);
         callSendAPI(sender_psid, response);
     });
 }
