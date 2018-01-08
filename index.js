@@ -196,7 +196,7 @@ function handleMessage(sender_psid, received_message) {
         // Checks if the message contains text
         if (received_message.text) {
             // check message and send proper payload
-            switch (recieved_message.text.toLowerCase()) {
+            switch (received_message.text.toLowerCase()) {
                 case 'help':
                     helpResponse(sender_psid);
                     break;
