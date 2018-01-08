@@ -99,6 +99,41 @@ app.get('/task/get', (req, res) => {
     });
 });
 
+
+RESPONSES = {
+    'BYE': {  "text": "Hope to see you again soon!" },
+    'CREATE_TASK':  { "text": "What would you like to add to the list?" },
+    'GREETING': { "text": "Hi there! What would you like to do? Type help if you need any assistance." },
+    'HELP': {
+        "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
+        "quick_replies":[
+            {
+                "content_type":"text",
+                "title":"List All Tasks",
+                "payload":"TASK_LIST"
+            },
+            {
+              "content_type":"text",
+              "title":"Create Task",
+              "payload":"CREATE_TASK"
+            },
+            // {
+            //     "content_type":"text",
+            //     "title":"Remove Task",
+            //     "payload":"REMOVE_TASK"
+            // },
+            // {
+            //     "content_type":"text",
+            //     "title":"Complete Task",
+            //     "payload":"COMPLETE_TASK"
+            // }
+        ]
+    },
+    'TASK_LIST': { "text": "List all the tasks here" },
+    'THANKS': { "text": "No problem! Let me know if you need anything else." },
+    'UNKNOWN': { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance." }
+}
+
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {  
     let body = req.body;
@@ -147,7 +182,6 @@ app.get('/webhook', (req, res) => {
 
         // Checks the mode and token sent is correct
         if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-        
             // Responds with the challenge token from the request
             console.log('WEBHOOK_VERIFIED');
             res.status(200).send(challenge);
@@ -175,19 +209,13 @@ function handleMessage(sender_psid, received_message) {
     const thanks = firstEntity(received_message.nlp, 'thanks');
     const bye = firstEntity(received_message.nlp, 'bye');
     if (greeting && greeting.confidence > 0.8) {
-        response = {
-            "text": "Hi there! What would you like to do? Type help if you need any assistance."
-        }
+        response = RESPONSES['GREETING'];
     }
     else if (thanks && thanks.confidence > 0.8) {
-        response = {
-            "text": "No problem! Let me know if you need anything else."
-        }
+        response = RESPONSES['THANKS'];
     }
     else if (bye && bye.confidence > 0.8) {
-        response = {
-            "text": "Hope to see you again soon!"
-        }
+        response = RESPONSES['BYE'];
     }
     else {
         // Checks if the message contains text
@@ -195,13 +223,16 @@ function handleMessage(sender_psid, received_message) {
             // check message and send proper payload
             switch (received_message.text.toLowerCase()) {
                 case 'help':
-                    response = helpResponse();
+                    response = RESPONSES['HELP'];
                     break;
                 case 'create task':
-                    response = createTaskResponse();
+                    response = RESPONSES['CREATE_TASK'];
+                    break;
+                case 'list all tasks':
+                    response = RESPONSES['TASK_LIST'];
                     break;
                 default:
-                    response = unknownResponse();
+                    response = RESPONSES['UNKNOWN'];
                     break;
             }
         }
@@ -219,58 +250,17 @@ function handlePostback(sender_psid, received_postback) {
     // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
-            response = taskListResponse();
+            response = RESPONSES['TASK_LIST'];
             break;
         case 'CREATE_TASK':
-            response = createTaskResponse();
+            response = RESPONSES['CREATE_TASK'];
             break;
         default:
-            response = unknownResponse();
+            response = RESPONSES['UNKNOWN'];
             break
     }    
-    
+
     callSendAPI(sender_psid, response);
-}
-
-function helpResponse(sender_psid) {
-    let response = {
-        "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
-        "quick_replies":[
-            {
-                "content_type":"text",
-                "title":"List All Tasks",
-                "payload":"TASK_LIST"
-            },
-            {
-              "content_type":"text",
-              "title":"Create Task",
-              "payload":"CREATE_TASK"
-            },
-            // {
-            //     "content_type":"text",
-            //     "title":"Remove Task",
-            //     "payload":"REMOVE_TASK"
-            // },
-            // {
-            //     "content_type":"text",
-            //     "title":"Complete Task",
-            //     "payload":"COMPLETE_TASK"
-            // }
-        ]
-    }  
-    return response;
-}
-
-function taskListResponse(sender_psid) {
-    return { "text": "List all the tasks here" }
-}
-
-function createTaskResponse(sender_psid) {
-    return { "text": "What would you like to add to the list?" }
-}
-
-function unknownResponse(sender_psid) {
-    return { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance."}
 }
 
 // Sends response messages via the Send API
