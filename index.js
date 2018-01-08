@@ -4,7 +4,10 @@
 const
   express = require('express'),
   bodyParser = require('body-parser'),
-  app = express().use(bodyParser.json()); // creates express http server
+  app = express().use(bodyParser.json()), // creates express http server
+  mongoose = require('mongoose'),
+  taskRoutes = require('./routes/task');
+  
 
 // request
 const request = require('request');
@@ -16,9 +19,7 @@ require('dotenv').load();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 // verify token, should be a random string
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-
-// Mongoose
-var mongoose = require('mongoose');
+// mongoose url
 const mongoDB = process.env.MONGO_URL;
 
 mongoose.connect(mongoDB, {
@@ -28,76 +29,23 @@ mongoose.connect(mongoDB, {
 mongoose.Promise = global.Promise;
 //Get the default connection
 var db = mongoose.connection;
-
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-// create task schema
-var Schema = mongoose.Schema;
-
-var TaskSchema = new Schema({
-    sender_psid: String,
-    task: String,
-    dt: Date
-});
-
-// Compile model from schema
-var TaskModel = mongoose.model('TaskModel', TaskSchema );
+// load model
+var TaskModel = require("./models/task").Task;
 
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
 // Index page
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/views/index.html');
 });
 
-// Add task
-app.post('/task/create', (req, res) => {
-    let body = req.body;
-    let psid = body.psid;
-    let task = body.task;
-    let dt = new Date();
-
-    if (!psid || !task || !dt) {
-        return res.status(200).send({ status: 'fail', msg: 'All fields are required' });
-    }
-
-    // Create an instance of model
-    var task_instance = new TaskModel({ 
-        sender_psid: psid,
-        task: task,
-        dt: dt
-    });
-
-    // Save the new model instance, passing a callback
-    task_instance.save(function (err) {
-        if (err) { return res.status(200).send({ status: 'fail' }); }
-
-        // saved!
-        console.log('Saved!');
-        return res.status(200).send({ status: 'success' });
-    });
-});
-
-app.get('/task/all', (req, res) => {
-    TaskModel.find(function (err, tasks) {
-        if (err) return console.error(err);
-        res.send(tasks);
-    });
-});
-
-app.get('/task/get', (req, res) => {
-    let psid = req.query['psid'];
-    if (!psid) {
-        return res.status(200).send({ status: 'fail', msg: 'PSID is required.' });
-    }
-
-    TaskModel.find({ sender_psid: psid }, function (err, tasks) {
-        if (err) return console.error(err);
-        res.send(tasks);
-    });
-});
+// task api routes
+app.post('/task/create', taskRoutes.create);
+app.get('/task/all', taskRoutes.getAll);
+app.get('/task/get', taskRoutes.get);
 
 
 const RESPONSES = {
@@ -119,7 +67,6 @@ const RESPONSES = {
             }
         ]
     },
-    'TASK_LIST': { "text": "List all the tasks here" },
     'THANKS': { "text": "No problem! Let me know if you need anything else." },
     'UNKNOWN': { "text": "I'm sorry, I can't recognize that command. Please try again or type help for further assistance." }
 }
@@ -337,7 +284,7 @@ function handleMessage(sender_psid, received_message) {
                     response = RESPONSES['CREATE_TASK'];
                     break;
                 case 'view all tasks':
-                    response = RESPONSES['TASK_LIST'];
+                    viewAllTasks(sender_psid);
                     break;
                 default:
                     // this is the case when we create a new task
