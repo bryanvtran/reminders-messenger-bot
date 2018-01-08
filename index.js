@@ -178,19 +178,16 @@ function handleMessage(sender_psid, received_message) {
         response = {
             "text": "Hi there! What would you like to do? Type help if you need any assistance."
         }
-        callSendAPI(sender_psid, response);
     }
     else if (thanks && thanks.confidence > 0.8) {
         response = {
             "text": "No problem! Let me know if you need anything else."
         }
-        callSendAPI(sender_psid, response);
     }
     else if (bye && bye.confidence > 0.8) {
         response = {
             "text": "Hope to see you again soon!"
         }
-        callSendAPI(sender_psid, response);
     }
     else {
         // Checks if the message contains text
@@ -198,17 +195,18 @@ function handleMessage(sender_psid, received_message) {
             // check message and send proper payload
             switch (received_message.text.toLowerCase()) {
                 case 'help':
-                    helpResponse(sender_psid);
+                    response = helpResponse();
                     break;
                 case 'create task':
-                    createTaskResponse(sender_psid);
+                    response = createTaskResponse();
                     break;
                 default:
-                    unknownResponse(sender_psid);
+                    response = unknownResponse();
                     break;
             }
         }
     } 
+    callSendAPI(sender_psid, response);
 }
 
 // Handles messaging_postbacks events
@@ -221,19 +219,21 @@ function handlePostback(sender_psid, received_postback) {
     // Set the response based on the postback payload and send the message
     switch (payload) {
         case 'TASK_LIST':
-            taskListReponse(sender_psid);
+            response = taskListResponse();
             break;
         case 'CREATE_TASK':
-            createTaskResponse(sender_psid);
+            response = createTaskResponse();
             break;
         default:
-            unknownResponse(sender_psid);
+            response = unknownResponse();
             break
     }    
+    
+    callSendAPI(sender_psid, response);
 }
 
 function helpResponse(sender_psid) {
-    response = {
+    let response = {
         "text": "Here are some things you can do: create a task, remove a task, and complete a task. Click one of the buttons below to get started!",
         "quick_replies":[
             {
@@ -258,22 +258,19 @@ function helpResponse(sender_psid) {
             // }
         ]
     }  
-    callSendAPI(sender_psid, response);
+    return response;
 }
 
-function taskListReponse(sender_psid) {
-    response = { "text": "List all the tasks here" }
-    callSendAPI(sender_psid, response);
+function taskListResponse(sender_psid) {
+    return { "text": "List all the tasks here" }
 }
 
 function createTaskResponse(sender_psid) {
-    response = { "text": "What would you like to add to the list?" }
-    callSendAPI(sender_psid, response);
+    return { "text": "What would you like to add to the list?" }
 }
 
 function unknownResponse(sender_psid) {
-    response = { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance."}
-    callSendAPI(sender_psid, response);
+    return { "text": "Sorry, that command is not recognized. Please try again or type help for further assistance."}
 }
 
 // Sends response messages via the Send API
