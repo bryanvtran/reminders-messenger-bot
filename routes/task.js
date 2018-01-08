@@ -1,4 +1,4 @@
-var TaskModel = require("../models/task").Task;
+var TaskModel = require("../models/task").TaskModel;
 
 exports.create = function(req, res) {
     let body = req.body;

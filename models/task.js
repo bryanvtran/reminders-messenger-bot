@@ -7,8 +7,8 @@ var TaskSchema = new mongoose.Schema({
     dt: Date
 });
 
-var Task = mongoose.model('Task', TaskSchema);
+var TaskModel = mongoose.model('TaskModel', TaskSchema);
 
 module.exports = {
-    Task: Task
+    TaskModel: TaskModel
 }

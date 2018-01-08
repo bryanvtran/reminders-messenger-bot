@@ -32,7 +32,7 @@ var db = mongoose.connection;
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // load model
-var TaskModel = require("./models/task").Task;
+var TaskModel = require("./models/task").TaskModel;
 
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
