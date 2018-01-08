@@ -100,7 +100,7 @@ app.get('/task/get', (req, res) => {
 });
 
 
-RESPONSES = {
+const RESPONSES = {
     'BYE': {  "text": "Hope to see you again soon!" },
     'CREATE_TASK':  { "text": "What would you like to add to the list?" },
     'GREETING': { "text": "Hi there! What would you like to do? Type help if you need any assistance." },
