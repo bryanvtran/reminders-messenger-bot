@@ -1,0 +1,26 @@
+{
+  "name": "reminders-messenger-bot",
+  "version": "1.0.0",
+  "description": "Basic messenger bot to send reminders",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bryanvtran/reminders-messenger-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bryanvtran/reminders-messenger-bot/issues"
+  },
+  "homepage": "https://github.com/bryanvtran/reminders-messenger-bot#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "request": "^2.83.0"
+  }
+}
