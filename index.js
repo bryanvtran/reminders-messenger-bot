@@ -245,28 +245,37 @@ function createNewTask(sender_psid, task) {
 function viewAllTasks(sender_psid) {
     let response;
 
-    console.log(sender_psid);
-
     TaskModel.find({ sender_psid: sender_psid }, function (err, tasks) {
         if (err) return console.error(err);
 
-        console.log(tasks);
-
-        let taskList = '';
+        let taskList = [];
         tasks.forEach(function(value, index) {
-            console.log(value.task);
-            taskList += value.task+'\n';
+            taskList.push({
+                "title": value.task,
+                "subtitle": value.dt,
+            })
         });
 
         console.log(taskList);
 
         if (taskList) {
             response = { "text": taskList }
+
+            response = {
+                "attachment": {
+                    "type": "template",
+                    "payload": {
+                        "template_type": "list",
+                        "top_element_style": "compact",
+                        "elements": taskList,
+                    }
+                }
+            }
         }
         else {
-            response = { "text": 'You have no tasks.' }
+            response = { "text": 'Yay! You have no tasks.' }
         }
-        console.log(response);
+
         callSendAPI(sender_psid, response);
     });
 }
