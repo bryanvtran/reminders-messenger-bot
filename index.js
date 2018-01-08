@@ -171,7 +171,7 @@ function handleMessage(sender_psid, received_message) {
     console.log(received_message);
 
     // check if it's a greeting
-    const greeting = firstEntity(received_message.nlp, 'greeting');
+    const greeting = firstEntity(received_message.nlp, 'greetings');
     if (greeting && greeting.confidence > 0.8) {
         response = {
             "text": "Hi there! What would you like to do? Type help if you need any assistance."
