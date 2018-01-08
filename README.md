@@ -7,3 +7,5 @@ A basic messenger bot for todo lists
 3. Include a button that opens a webview
 4. Include quick replies/persistent menu
 5. Put your code in github
+
+The app is currently published [here](https://limitless-springs-86949.herokuapp.com/).
